@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- ㅡmodel.Action에서 실행 --> <!-- resultType=return=결과값을 남기자 --> <!-- 형태는 늘 Dto -->
+<mapper namespace="abc">
+<select id="IDCheck" parameterType="String" resultType="MemberDto">select * from member_tb where ID=#{id};</select>
+<select id="Login" parameterType="MemberDto" resultType="MemberDto">select * from member_tb where ID=#{id} and PW=#{pw};</select>
+<insert id="Signinsert" parameterType="MemberDto">insert into member_tb (ID, NAME, PW, TEL, EMAIL, GENDER, ADDRESS_CODE, ADDRESS_BASIC, ADDRESS_DETAIL, BIRTH, PIC, LEVEL, POSITION, SECOND_PW, SECOND_PWC, BANK_CODE, ACCOUNT_CODE, ACCOUNT_HOLDER) values(#{id},#{name},#{pw},#{tel},#{email},#{gender},#{address_code},#{address_basic},#{address_detail},#{birth},#{pic},#{level},#{position},#{second_pw},#{second_pwc},#{bank_code},#{account_code},#{account_holder});</insert>
+<update id = "modifyPw" parameterType="MemberDto">update member_tb set PW = #{pw} where ID=#{id}; </update>
+<update id = "modifySign" parameterType="MemberDto">update member_tb set PW = #{pw}, TEL = #{tel}, EMAIL = #{email}, ADDRESS_CODE = #{address_code}, ADDRESS_BASIC = #{address_basic}, ADDRESS_DETAIL = #{address_detail}, BIRTH = #{birth}, PIC = #{pic}, LEVEL = #{level}, POSITION = #{position}, SECOND_PW = #{second_pw}, SECOND_PWC= #{second_pwc}, BANK_CODE= #{bank_code}, ACCOUNT_CODE = #{account_code}, ACCOUNT_HOLDER= #{account_holder}  where ID=#{id}; </update>
+<select id="selectMember"  parameterType="String" resultType="MemberDto">select * from member_tb where ID = #{id};</select>
+<delete id = "delSign" parameterType="MemberDto">delete from member_tb where ID = #{id};</delete>
+<!-- <select id="qnatitle" parameterType="QnaSearchDto" resultType="QnaSearchDto">select * from qnaboard_tb  where q_b_title like concat('%' , #{q_b_title}, '%');</select>
+<select id="qnacontents" parameterType="QnaSearchDto" resultType="QnaSearchDto">select * from qnaboard_tb  where q_b_contents like concat('%' , #{q_b_title}, '%');</select> -->
+<!-- 대관 sql 모음 by 지은 -->
+<select id="branchlist_view" parameterType="BranchDto" resultType="BranchDto">
+select * from branch_tb WHERE BRANCH_STATE='완료'; </select>
+
+<select id="branchdetail_view" parameterType="String" resultType="BranchDto">select * from branch_tb where BRANCH_NO=#{branch_no};</select>
+<select id="grounddetail_view" parameterType="String" resultType="GroundDto">select * from ground_tb where BRANCH_NO=#{branch_no};</select>
+<select id="click_ground_reservation" parameterType="String" resultType="GroundDto">select * from ground_tb where BRANCH_NO=#{branch_no};</select>
+<select id="click_branch_reservation" parameterType="String" resultType="BranchDto">select * from branch_tb where BRANCH_NO=#{branch_no};</select>
+<insert id="input_reservation" parameterType="ReservationDto">
+	<selectKey resultType="int" keyProperty="res_no" order="BEFORE">
+        SELECT MAX(RES_NO)+1 FROM reservation_tb        
+    </selectKey>
+	insert into reservation_tb (RES_NO, RES_DATE, RES_TIME, RES_STATUS, PAYMENT_CHARGE, ID, GROUND_NO, RES_MOMENT) values(#{res_no},#{res_date},#{res_time},#{res_status},#{payment_charge},#{id},#{ground_no},now());
+</insert>
+<insert id="input_reservation_paymentpage" parameterType="ReservationDto">
+	<selectKey resultType="int" keyProperty="res_no" order="BEFORE">
+        SELECT MAX(RES_NO)+1 FROM reservation_tb        
+    </selectKey>
+	insert into reservation_tb (RES_NO, RES_DATE, RES_TIME, RES_STATUS, PAYMENT_CHARGE, ID, GROUND_NO, RES_MOMENT) values(#{res_no},#{res_date},#{res_time},#{res_status},#{payment_charge},#{id},#{ground_no},now());
+</insert>
+<select id="GroundCheck" parameterType="GroundDto" resultType="GroundDto">select * from ground_tb where GROUND_NAME=#{ground_name} and BRANCH_NO=#{branch_no};</select>
+<select id="reservationlist" parameterType="String" resultType="ReservationDto">select * from reservation_tb where ID=#{id} order by RES_DATE; </select>
+<select id="reservationlist_Branch" parameterType="String" resultType="BranchDto">select reservation_tb.ID,branch_tb.BRANCH_NAME,ground_tb.GROUND_NAME from branch_tb,ground_tb,reservation_tb where branch_tb.BRANCH_NO = ground_tb.BRANCH_NO and reservation_tb.GROUND_NO = ground_tb.GROUND_NO and reservation_tb.ID = #{id} order by RES_DATE;</select>
+<select id="reservationlist_Ground" parameterType="String" resultType="GroundDto">select reservation_tb.ID,branch_tb.BRANCH_NAME,ground_tb.GROUND_NAME from branch_tb,ground_tb,reservation_tb where branch_tb.BRANCH_NO = ground_tb.BRANCH_NO and reservation_tb.GROUND_NO = ground_tb.GROUND_NO and reservation_tb.ID = #{id} order by RES_DATE;</select><select id="reservationlistcount" resultType="int">select count(*) from reservation_tb; </select>
+<update id="res_status_update" parameterType="ReservationDto">update reservation_tb set RES_STATUS = #{res_status} where RES_NO=#{res_no};</update>
+<select id="paymentsuccess_Reservation" parameterType="int" resultType="ReservationDto">select * from reservation_tb where RES_NO = #{res_no};</select>
+<select id="paymentsuccess_Branch" parameterType="int" resultType="BranchDto">select reservation_tb.RES_NO,branch_tb.BRANCH_NAME,ground_tb.GROUND_NAME from branch_tb,ground_tb,reservation_tb where branch_tb.BRANCH_NO = ground_tb.BRANCH_NO and reservation_tb.GROUND_NO = ground_tb.GROUND_NO and reservation_tb.RES_NO = #{res_no};</select>
+<select id="paymentsuccess_Ground" parameterType="int" resultType="GroundDto">select reservation_tb.ID,branch_tb.BRANCH_NAME,ground_tb.GROUND_NAME from branch_tb,ground_tb,reservation_tb where branch_tb.BRANCH_NO = ground_tb.BRANCH_NO and reservation_tb.GROUND_NO = ground_tb.GROUND_NO and reservation_tb.RES_NO = #{res_no};</select>
+<delete id="reservation_delete" parameterType="int">delete from reservation_tb where RES_NO = #{res_no};</delete>
+<select id="unavailable_nodatetime_pick" parameterType="String" resultType="ReservationDto">select RES_STATUS,RES_NO,RES_DATE,RES_TIME,BRANCH_NAME,GROUND_NAME,reservation_tb.ID from reservation_tb,branch_tb,ground_tb where branch_tb.BRANCH_NO = ground_tb.BRANCH_NO and reservation_tb.GROUND_NO = ground_tb.GROUND_NO and (RES_STATUS = 10 or RES_STATUS = 20);</select>
+<select id="rescomplete_ground_as_date" parameterType="ComResInfoDto" resultType="ComResInfoDto">select RES_DATE,RES_TIME,branch_tb.BRANCH_NO,branch_tb.BRANCH_NAME,ground_tb.GROUND_NO,ground_tb.GROUND_NAME from reservation_tb,branch_tb,ground_tb where branch_tb.BRANCH_NO = ground_tb.BRANCH_NO and reservation_tb.GROUND_NO = ground_tb.GROUND_NO and ground_tb.GROUND_NAME = #{ground_name} and (RES_STATUS = 10 or RES_STATUS = 20) and RES_DATE = #{res_date} and branch_tb.BRANCH_NO = #{branch_no};</select>
+<select id="datepicker_selecthidden" parameterType="ComResInfoDto" resultType="ComResInfoDto">select count(*) as radiocount ,ground_tb.GROUND_NO, ground_tb.GROUND_NAME from reservation_tb,branch_tb,ground_tb where branch_tb.BRANCH_NO = ground_tb.BRANCH_NO and reservation_tb.GROUND_NO = ground_tb.GROUND_NO and (RES_STATUS = 10 or RES_STATUS = 20) and RES_DATE = #{res_date} and branch_tb.BRANCH_NO = #{branch_no} group by ground_tb.GROUND_NO ;</select>
+<select id="fulldate_select" parameterType="ComResInfoDto" resultType="ComResInfoDto">
+select count(c.RES_DATE) as fulldate,c.RES_DATE from(select count(*) as sevencount,reservation_tb.RES_DATE,ground_tb.GROUND_NO, ground_tb.GROUND_NAME from reservation_tb,branch_tb,ground_tb
+where branch_tb.BRANCH_NO = ground_tb.BRANCH_NO and reservation_tb.GROUND_NO = ground_tb.GROUND_NO and (RES_STATUS = 10 or RES_STATUS = 20) and branch_tb.BRANCH_NO = #{branch_no}
+group by ground_tb.GROUND_NO,reservation_tb.RES_DATE having sevencount = 7) as c group by c.RES_DATE having fulldate = #{fulldate};
+</select>
+<update id="oneday_status30" parameterType="ReservationDto"><![CDATA[update reservation_tb set RES_STATUS=30 where DATE_ADD(RES_MOMENT, INTERVAL 1 DAY) < now() and RES_STATUS=10;]]></update>
+<!-- 대관 sql 모음 by 지은 끝 -->
+<!-- 03.27 마이페이지 by 지은 시작 -->
+<select id="myteam" parameterType="String" resultType="TeamDto">
+select * from teaminfo_tb where T_CODE in(SELECT T_CODE FROM teamplayer_tb where teamplayer_tb.ID=#{id});
+</select>
+<select id="myleague" parameterType="String" resultType="LeagueandLeagueResultDto">
+SELECT * FROM league_result_tb inner join teamplayer_tb on league_result_tb.T_CODE=teamplayer_tb.T_CODE and teamplayer_tb.ID=#{id}
+inner join league_tb on league_tb.LEAGUE_CODE=league_result_tb.LEAGUE_CODE
+inner join teaminfo_tb on teaminfo_tb.T_CODE=league_result_tb.T_CODE
+inner join branch_tb on league_tb.BRANCH_NO=branch_tb.BRANCH_NO order by T_NAME;
+</select>
+<!-- 03.27 마이페이지 by 지은 끝 -->
+
+<!-- 팀관련 sql 모음 by Pang -->
+<sql id="searchCondition_qna">
+	<if test="searchType != null">
+		<if test="searchType == 'contents'.toString()">and Q_B_CONTENTS like concat('%', #{keyword}, '%')</if>
+		<if test="searchType == 'name'.toString()">and Q_B_NAME like concat('%', #{keyword}, '%')</if>
+		<if test="searchType == 'all'.toString()">and (Q_B_CONTENTS like concat('%', #{keyword}, '%') or Q_B_NAME like concat('%', #{keyword}, '%') or Q_B_TITLE like concat('%', #{keyword}, '%'))</if>
+	</if>
+</sql>
+<select id="qnatotalcount" parameterType="TeamPageDto" resultType="int">select count(*) from qnaboard_tb where Q_B_NO > 0<include refid="searchCondition_qna"></include></select>
+<select id="getqnalist" parameterType="TeamPageDto" resultType="QnaDto">select * from qnaboard_tb where Q_B_NO > 0<include refid="searchCondition_qna"></include>order by Q_B_NO desc limit #{page}, 9</select>
+
+<select id="teamlist_view" parameterType="TeamDto" resultType="TeamDto">
+	select * from teaminfo_tb order by T_BIRTH ASC; </select>
+<select id="teamone" parameterType="TeamDto" resultType="TeamDto">
+	select * from teaminfo_tb  where T_CODE = #{t_code};</select>
+	
+	
+<select id="registplayer_view" parameterType="TeamDto" resultType="TeamDto">select * from teamplayer_tb; </select>
+
+
+<update id="Teammodify" parameterType="TeamDto">
+	update teaminfo_tb set T_NAME = #{t_name},T_CLASS = #{t_class}, T_EMAIL = #{t_email}, 
+		T_UNIFORM_HOME = #{t_uniform_home}, T_UNIFORM_AWAY = #{t_uniform_away}, T_LOGO = #{t_logo} 
+		where T_CODE=#{t_code} ; </update>
+<insert id="Teaminsert" parameterType="TeamDto">
+	insert into teaminfo_tb (ID, T_NAME, T_CODE, T_LOGO, T_EMAIL, T_UNIFORM_HOME, T_UNIFORM_AWAY, T_CLASS) 
+		values(#{id},#{t_name},#{t_code},#{t_logo},#{t_email},#{t_uniform_home},#{t_uniform_away},#{t_class});
+		</insert>
+<select id="searchteamlist" parameterType="TeamDto" resultType="TeamDto">
+	select * from teaminfo_tb  <where><if test="teamtype!=null">T_CLASS in (#{teamtype}) </if>
+		<if test="word!=null"> and T_NAME like concat('%' , #{word}, '%')</if></where>;</select>
+<select id="searchteamlistall" parameterType="TeamDto" resultType="TeamDto">
+	select * from teaminfo_tb  <where><if test="word!=null">T_NAME like concat('%' , #{word}, '%')</if>
+		</where>;</select>
+		
+		
+<select id="league_result" parameterType="LeagueResultDto" resultType="LeagueResultDto">select * from league_result_tb where T_CODE = #{t_code}; </select>
+
+<select id="player_list" parameterType="PlayerRegistDto" resultType="PlayerRegistDto">select * from player_regist_tb where T_CODE = #{t_code}; </select>
+
+
+<insert id="team_apply" parameterType="PlayerRegistDto">
+	insert into team_apply_tb (ID,T_CODE) values(#{id},#{t_code});</insert>
+	
+	
+<select id="playerapplycheck" parameterType="PlayerRegistDto" resultType="PlayerRegistDto">select * from team_apply_tb where T_CODE = #{t_code} and ID = #{id}; </select>
+
+
+<select id="playerteamcheck" parameterType="PlayerRegistDto" resultType="PlayerRegistDto">select * from teamplayer_tb where T_CODE = #{t_code} and ID = #{id}; </select>
+<select id="team_apply_list" parameterType="PlayerRegistDto" resultType="PlayerRegistDto">select * from team_apply_tb  where T_CODE = #{t_code}; </select>
+<select id="leader_check" parameterType="PlayerRegistDto" resultType="PlayerRegistDto">select * from teaminfo_tb where T_CODE=#{t_code} and ID=#{id};</select>
+<insert id="join_success" parameterType="PlayerRegistDto">insert into teamplayer_tb (ID,T_CODE) values(#{id},#{t_code});</insert>
+<delete id="join_fail" parameterType="PlayerRegistDto">delete from team_apply_tb where ID=#{id} and T_CODE=#{t_code};</delete>
+<select id="team_apply_member_list" parameterType="PlayerRegistDto" resultType="MemberDto">select ID,NAME,POSITION,TEL from member_tb where ID in (select ID from team_apply_tb where T_CODE=#{t_code}); </select>
+<!-- 팀 순위 -->
+
+
+
+<select id="league_point" parameterType="LeagueResultDto" resultType="LeagueResultDto">
+	SELECT * FROM league_result_tb where LEAGUE_CODE in (select LEAGUE_CODE from league_result_tb where T_CODE= #{t_code}) order by LEAGUE_POINT desc;</select>
+<select id="league" parameterType="LeagueDto" resultType="LeagueDto">
+	select * from league_tb; </select>
+<select id="player_list_member" parameterType="PlayerRegistDto" resultType="MemberDto">
+	select * from member_tb where ID in (select ID from player_regist_tb where T_CODE=#{t_code}); </select>
+<!-- 팀리스트 검색 페이징 추가 -->
+<sql id="searchCondition_teamlist">
+	<if test="searchType != null">
+		<if test="searchType == 'branch'.toString()">and T_CLASS like concat('%', #{keyword}, '%')</if>
+		<if test="searchType == 'name'.toString()">and T_NAME like concat('%', #{keyword}, '%')</if>
+		<if test="searchType == 'all'.toString()">and (T_CLASS like concat('%', #{keyword}, '%') or T_NAME like concat('%', #{keyword}, '%'))</if>
+	</if>
+</sql>
+<select id="teamtotalcount" parameterType="TeamPageDto" resultType="int">select count(*) from teaminfo_tb where T_CODE > 0<include refid="searchCondition_teamlist"></include></select>
+<select id="getteamlist" parameterType="TeamPageDto" resultType="TeamDto">select * from teaminfo_tb where T_CODE > 0<include refid="searchCondition_teamlist"></include>order by T_BIRTH asc limit #{page}, 9</select>
+<!-- 팀리스트 검색 페이징 끝 -->
+	
+<!-- 팀 관련 sql 모음 by Pang End -->
+
+<!-- sql 모음 by Hyeok -->
+
+
+<insert id="teamboardinsert" parameterType="TeamBoardListDto">
+	<selectKey resultType="int" keyProperty="T_B_NO" order="BEFORE">
+		SELECT MAX(T_B_NO)+1 FROM teamboard_tb</selectKey>
+	insert into teamboard_tb (T_B_NO, T_B_CONTENTS, T_B_SUBJECT, T_B_DATE, T_B_READCOUNT, ID, T_CODE) 
+		values(#{T_B_NO},#{T_B_CONTENTS},#{T_B_SUBJECT},now(),0,#{id},${T_CODE});
+</insert>
+
+
+<update id="teamboardreadcount" parameterType="TeamBoardListDto"> update teamboard_tb set T_B_READCOUNT=T_B_READCOUNT+1 where T_B_NO=#{T_B_NO};</update>
+
+<select id="teamboarddetail" parameterType="TeamBoardListDto" resultType="TeamBoardListDto">
+select * from teamboard_tb where T_B_NO=#{T_B_NO};</select>
+
+<select id="teamboardrep" parameterType="TeamBoardRepDto" resultType="TeamBoardRepDto">select * from teamboardrep_tb where T_B_NO=#{T_B_NO} order by TB_REP_NO desc; </select>
+
+
+<insert id="teamboardrepinsert" parameterType="TeamBoardRepDto">
+	<selectKey resultType="int" keyProperty="tb_rep_no" order="BEFORE">
+		SELECT MAX(TB_REP_NO)+1 FROM teamboardrep_tb</selectKey>
+	insert into teamboardrep_tb (TB_REP_NO,TB_REP_CONTENTS, TB_REP_DATE, T_B_NO, ID) 
+		values(#{tb_rep_no},#{tb_rep_contents},now(),#{t_b_no},#{id});
+</insert>
+
+
+<select id="teamboardrepmax" resultType="TeamBoardRepDto">select max(TB_REP_NO) from teamboardrep_tb; </select>
+
+
+<update id="teamboardmodify" parameterType="TeamBoardListDto">
+	update teamboard_tb set T_B_CONTENTS=#{T_B_CONTENTS}, T_B_SUBJECT=#{T_B_SUBJECT} 
+		where T_B_NO=#{T_B_NO};</update>
+		
+		
+<delete id = "teamboarddelete" parameterType="TeamBoardListDto">
+	delete from teamboard_tb where T_B_NO = #{T_B_NO};</delete>
+	
+	
+<select id="leaguelist" resultType="LeagueDto">select * from league_tb; </select>
+
+<select id="leaguebranchlist" resultType="BranchDto">
+	select * from branch_tb where BRANCH_NO in (select BRANCH_NO from league_tb);
+</select>
+
+<select id="leagueselectone" parameterType="int" resultType="LeagueDto">
+	select * from league_tb where BRANCH_NO=#{branch_no}; </select>
+	
+<select id="teamleaguelist" parameterType="String" resultType="TeamDto">
+	select * from teaminfo_tb where T_CODE in (select T_CODE from teamplayer_tb 
+		where ID=#{id}); 
+</select>
+	
+	
+<select id="leagueteamcheck" parameterType="LeagueResultDto" resultType="LeagueResultDto">select * from league_result_tb where T_CODE = #{t_code} and LEAGUE_CODE = #{league_code}; </select>
+
+<insert id="leagueplayerregist" parameterType="PlayerRegistDto">
+insert into player_regist_tb (ID, LEAGUE_CODE, T_CODE, PLAYER_POSITION, PLAYER_UNIFORMNUM) values(#{id},#{league_code},#{t_code},#{player_position},#{player_uniformnum});
+</insert>
+	
+
+<select id="playerleaguecheck" parameterType="PlayerRegistDto" resultType="PlayerRegistDto">select * from player_regist_tb where T_CODE = #{t_code} and LEAGUE_CODE = #{league_code} and ID = #{id}; </select>
+<select id="leaguecheck" parameterType="LeagueResultDto" resultType="LeagueResultDto">select * from seoul_league_tb where T_CODE = #{t_code} and LEAGUE_CODE = #{league_code}; </select>
+
+<insert id="leagueteamregist" parameterType="LeagueResultDto">
+	<selectKey resultType="int" keyProperty="league_result_code" order="BEFORE">SELECT MAX(LEAGUE_RESULT_CODE)+1 FROM league_result_tb</selectKey>
+	insert into league_result_tb (LEAGUE_RESULT_CODE, T_CODE, LEAGUE_CODE) values(#{league_result_code},#{t_code},#{league_code});
+</insert>
+
+<insert id="leagueteamregistseoul" parameterType="PlayerRegistDto">insert into seoul_league_tb (T_CODE, LEAGUE_CODE, ID) values(#{t_code},#{league_code},#{id});</insert>
+<select id="teamlist" parameterType="String" resultType="TeamDto">select * from teaminfo_tb where ID = #{id};</select>
+<sql id="searchCondition">
+	<if test="searchType != null">
+		<if test="searchType == 'subject'.toString()">and T_B_SUBJECT like concat('%', #{keyword}, '%')</if>
+		<if test="searchType == 'id'.toString()">and ID like concat('%', #{keyword}, '%')</if>
+		<if test="searchType == 'all'.toString()">and (T_B_SUBJECT like concat('%', #{keyword}, '%') or ID like concat('%', #{keyword}, '%'))</if>
+	</if>
+</sql>
+<sql id="teamSearchCondition"><if test="t_code != null">and T_CODE = #{t_code}</if></sql>
+<select id="listPage" parameterType="TeamPageDto" resultType="TeamBoardListDto">select * from teamboard_tb where T_B_NO > 0
+	<include refid="teamSearchCondition"></include><include refid="searchCondition"></include>order by T_B_NO desc, T_B_DATE desc limit #{page}, 9</select>
+<!-- 검색 조건에 해당하는 전체 게시물 수 조회 -->
+<select id="gettotalcount" parameterType="TeamPageDto" resultType="int">select count(*) from teamboard_tb where T_B_NO > 0<include refid="teamSearchCondition"></include><include refid="searchCondition"></include></select>
+<select id="leadercheck" parameterType="String" resultType="TeamDto">select * from teaminfo_tb where ID=#{id};</select>
+<select id="leagueallselect" resultType="LeagueDto">select * from league_tb;</select>
+<select id="league_result_Whleague" parameterType="Int" resultType="LeagueResultDto">
+	select * from league_result_tb, teaminfo_tb WHERE LEAGUE_CODE=#{league_code} and 
+	league_result_tb.T_CODE=teaminfo_tb.T_CODE ORDER BY LEAGUE_POINT desc limit 1,6;</select>
+<select id="league_player_Whleague" parameterType="Int" resultType="PlayerRegistDto">
+	select * from player_regist_tb,member_tb WHERE LEAGUE_CODE=#{league_code} and 
+		player_regist_tb.ID=member_tb.ID ORDER BY PLAYER_GOALS desc limit 1,2;</select>
+
+
+<sql id="searchCondition_match">
+	<if test="searchType != null">
+		<if test="searchType == 'contents'.toString()">and M_B_CONTENTS like concat('%', #{keyword}, '%')</if>
+		<if test="searchType == 'name'.toString()">and M_B_NAME like concat('%', #{keyword}, '%')</if>
+		<if test="searchType == 'branch'.toString()">and M_B_BRANCH like concat('%', #{keyword}, '%')</if>
+		<if test="searchType == 'all'.toString()">and (M_B_CONTENTS like concat('%', #{keyword}, '%') or M_B_NAME 
+			like concat('%', #{keyword}, '%') or M_B_BRANCH like concat('%', #{keyword}, '%'))</if>
+	</if>
+</sql>
+<select id="matchtotalcount" parameterType="TeamPageDto" resultType="int">
+	select count(*) from matchboard_tb where M_B_NO > 0
+		<include refid="searchCondition_match"></include></select>
+<select id="getmatchlist" parameterType="TeamPageDto" resultType="MatchlistDto">
+	select M_B_NO, M_B_NAME, M_B_BRANCH BRANCH_NO, M_B_GROUND, M_B_TEL, M_B_SCHEDULE, M_B_TIME, M_B_STATUS, M_B_LEVEL, M_B_CONTENTS, a.ID, M_B_TYPE, M_B_COUNT, b.BRANCH_NAME M_B_BRANCH
+	from matchboard_tb a
+	inner join branch_tb b on a.M_B_BRANCH = b.BRANCH_NO
+	where M_B_NO > 0
+		<include refid="searchCondition_match"></include>order by M_B_NO desc limit #{page}, 9</select>
+
+
+<sql id="searchCondition_yong">
+	<if test="searchType != null">
+		<if test="searchType == 'contents'.toString()">and Y_B_CONTENTS like concat('%', #{keyword}, '%')</if>
+		<if test="searchType == 'name'.toString()">and Y_B_NAME like concat('%', #{keyword}, '%')</if>
+		<if test="searchType == 'branch'.toString()">and Y_B_BRANCH like concat('%', #{keyword}, '%')</if>
+		<if test="searchType == 'all'.toString()">and (Y_B_CONTENTS like concat('%', #{keyword}, '%') or Y_B_NAME 
+			like concat('%', #{keyword}, '%') or Y_B_BRANCH like concat('%', #{keyword}, '%'))</if>
+	</if>
+</sql>
+<select id="yongtotalcount" parameterType="TeamPageDto" resultType="int">
+	select count(*) from yongboard_tb where Y_B_NO > 0
+		<include refid="searchCondition_yong"></include></select>
+<select id="getyonglist" parameterType="TeamPageDto" resultType="YonglistDto">
+	select Y_B_NO, Y_B_NAME, Y_B_BRANCH BRANCH_NO, Y_B_GROUND, Y_B_TEL, Y_B_SCHEDULE, Y_B_TIME, Y_B_STATUS, Y_B_LEVEL, Y_B_CONTENTS, a.ID, BRANCH_NAME Y_B_BRANCH
+	from yongboard_tb a
+	inner join branch_tb b on a.Y_B_BRANCH=b.BRANCH_NO
+	where Y_B_NO > 0
+		<include refid="searchCondition_yong"></include>order by Y_B_NO desc limit #{page}, 9</select>
+
+
+
+<!-- sql 모음 by Hyeok 끝 -->
+
+<!-- 관리자페이지,공지사항 by Moon   -->
+<select id="AdminLogin" parameterType="AdminDto" resultType="AdminDto">select * from admin_tb where ADMIN_ID=#{admin_id} and ADMIN_PASSWORD=#{admin_password};</select>
+<insert id="AdminBranchRepinsert" parameterType="AdminBranchRepDto">insert into admin_brabch_rep_tb (BRANCH_REP_CONTENTS,BRANCH_NO,NAME,BRANCH_REP_DATE) values(#{branch_rep_contents},#{branch_no},#{name},now());</insert>
+<select id="AdminBranchRepselect" parameterType="String" resultType="AdminBranchRepDto">select * from admin_brabch_rep_tb where BRANCH_NO=#{branch_no} order by BRANCH_REP_DATE desc;</select>
+<update id = "Brabchupdate" parameterType="BranchDto">update branch_tb set BRANCH_STATE = #{branch_state} where BRANCH_NO=#{branch_no}; </update>
+<select id="branchlist_view_admin" parameterType="BranchDto" resultType="BranchDto">select * from branch_tb; </select>
+<select id="branchlist_view2" parameterType="BranchDto" resultType="BranchDto">select * from branch_tb where ID=#{id}; </select>
+<insert id="Brabchinsert" parameterType="BranchDto">insert into branch_tb (BRANCH_NAME,BRANCH_TEL, BRANCH_CONVENIENCE,BRANCH_LOCATION,BRANCH_PIC,ID,NAME) values(#{branch_name},#{branch_tel},#{branch_convenience},#{branch_location},#{branch_pic},#{id},#{name});</insert>
+<select id="checkbrabch" parameterType="String" resultType="BranchDto">select * from branch_tb where BRANCH_NAME=#{branch_name};</select>
+<select id="checkground" parameterType="String" resultType="GroundDto">select * from ground_tb where GROUND_NAME=#{ground_name};</select>
+<insert id="Groundinsert" parameterType="GroundDto">insert into ground_tb( GROUND_NAME , GROUND_PIC, GROUND_FIELD , GROUND_SIZE , GROUND_RULE, GROUND_WEEKDAYDAYTIME_CHARGE , GROUND_WEEKDAYNIGHT_CHARGE , GROUND_WEEKENDDAYTIME_CHARGE, GROUND_WEEKENDNIGHT_CHARGE,BRANCH_NO) values(#{ground_name},#{ground_pic},#{ground_field},#{ground_size},#{ground_rule},#{ground_weekdaydaytime_charge},#{ground_weekdaynight_charge},#{ground_weekenddaytime_charge},#{ground_weekendnight_charge},#{branch_no});</insert>
+<select id="memberlist_view" parameterType="MemberDto" resultType="MemberDto">select * from member_tb; </select>
+<select id="noticeboardList_view" parameterType="NoticeboardDto" resultType="NoticeboardDto">select * from noticeboard_tb; </select>
+<select id="noticeboardList_view2" parameterType="NoticeboardDto" resultType="NoticeboardDto">select * from noticeboard_tb where N_NUM=#{n_num}; </select>
+<update id="noticeboard_readcount" parameterType="NoticeboardDto">update noticeboard_tb set N_READCOUNT = N_READCOUNT + 1 where N_NUM=#{n_num}; </update>
+<insert id="noticeboard_insert" parameterType="NoticeboardDto" >insert into noticeboard_tb (N_TITLE,N_CONTENTS,admin_name,N_DATE,N_NUM,N_STATE) values(#{n_title},#{n_contents},#{admin_name},now(),#{n_num},#{n_state});</insert>
+<select id="noticeboardList3" parameterType="String" resultType="NoticeboardDto"> SELECT * FROM noticeboard_tb where N_STATE=#{a} ORDER BY N_DATE desc; </select>
+<select id="memberdetail_view" parameterType="String" resultType="MemberDto">select * from member_tb where ID=#{id};</select>
+<select id="noticeboardList" parameterType="String" resultType="NoticeboardDto"> SELECT * FROM noticeboard_tb; </select>
+<!-- 관리자페이지 끝  -->
+<!-- 관리자페이지 추가 04.02 지은 -->
+<select id="AdminQnaListview" parameterType="String" resultType="QnaDto">SELECT * FROM qnaboard_tb where Q_B_STATUS="질문";</select>
+<select id="AdminQnaDetailview" parameterType="int" resultType="QnaDto">SELECT * FROM qnaboard_tb where Q_B_NO=#{q_b_no};</select>
+</mapper>
